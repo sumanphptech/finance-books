@@ -9,6 +9,13 @@ use GuzzleHttp\Client;
 
 class ZohoAuthController extends Controller
 {
+    protected $client;
+
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+    }
+
     public function redirect()
     {
         $clientId = env('ZOHO_CLIENT_ID');
@@ -24,14 +31,12 @@ class ZohoAuthController extends Controller
     public function callback(Request $request)
     {
 
-        // Log::info(HIiii);
-
         $code = $request->query('code');
-        $client = new Client();
+       
 
         try {
         
-            $response = $client->post('https://accounts.zoho.in/oauth/v2/token', [
+            $response = $this->client->post('https://accounts.zoho.in/oauth/v2/token', [
                 'form_params' => [
                     'grant_type' => 'authorization_code',
                     'client_id' => env('ZOHO_CLIENT_ID'),
@@ -47,14 +52,10 @@ class ZohoAuthController extends Controller
             $accessToken = $data['access_token'] ?? null;
             $refreshToken = $data['refresh_token'] ?? null;          
 
-            // $accessToken = '1000.739cf5a0a5d8f5bd77a5070cd41b6e0b.85de6f899973d96e537fa85635209aa8';
-            // $refreshToken = '1000.1ba18ebd0f8163485ca92017c0f8374a.0215bc2c1072ac2ddfc9ef786fe4be90';
-
-            Log::info($accessToken);
-            Log::info($refreshToken);
+            
 
             // Get Organization
-            $organizationsResponse = $client->get('https://www.zohoapis.in/books/v3/organizations',[
+            $organizationsResponse = $this->client->get('https://www.zohoapis.in/books/v3/organizations',[
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Zoho-oauthtoken ' . $accessToken, 
@@ -72,7 +73,7 @@ class ZohoAuthController extends Controller
             return redirect()->away('http://localhost:3000?refresh_token=' . $refreshToken . '&access_token=' . $accessToken . '&organization_id=' . $organizationId);
 
         } catch (\Exception $e) {
-            // Log::error('Error exchanging code for tokens: ' . $e->getMessage());
+            
             return response()->json(['error' => 'Authentication failed'], 500);
         }
 

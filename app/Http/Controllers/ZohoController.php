@@ -8,15 +8,18 @@ use Illuminate\Support\Facades\Log;
 
 class ZohoController extends Controller
 {
-    //
-
     public function getChartAccounts(Request $request) {
 
         $curl = curl_init();
 
-       // $access_token = $this->getAccessToken();    
-       $accessToken = '1000.acdc8814e6ff807499aa920e18fc561b.86903198b5b6eefaa2af66c3696f9596';   
-
+        if($request->getAccessToken==1)
+        {
+            $accessToken = $this->getAccessToken($request->refreshToken);
+        }
+        else
+        {
+            $accessToken = $request->accessToken;
+        }
        
 
         curl_setopt_array($curl, array(
@@ -45,11 +48,14 @@ class ZohoController extends Controller
 
         $curl = curl_init();
 
-        // $access_token = $this->getAccessToken();
-        $accessToken = '1000.acdc8814e6ff807499aa920e18fc561b.86903198b5b6eefaa2af66c3696f9596';
-
-         // Log::info($request);
-        // return $request;
+        if($request->getAccessToken==1)
+        {
+            $accessToken = $this->getAccessToken($request->refreshToken);          
+        }
+        else
+        {
+            $accessToken = $request->accessToken;           
+        }
 
         curl_setopt_array($curl, array(
         CURLOPT_URL => 'https://www.zohoapis.in/books/v3/contacts?organization_id='.$request->organizationId,
@@ -67,9 +73,7 @@ class ZohoController extends Controller
         ));
 
         $response = curl_exec($curl);
-        curl_close($curl);
-
-       
+        curl_close($curl);       
         
         return $response;
     }
@@ -78,11 +82,17 @@ class ZohoController extends Controller
 
         $curl = curl_init();
 
-        // $access_token = $this->getAccessToken();
-        $accessToken = '1000.acdc8814e6ff807499aa920e18fc561b.86903198b5b6eefaa2af66c3696f9596';
+        
+       
 
-         // Log::info($request);
-        // return $request;
+        if($request->getAccessToken==1)
+        {
+            $accessToken = $this->getAccessToken($request->refreshToken);           
+        }
+        else
+        {
+            $accessToken = $request->accessToken;            
+        }
 
         curl_setopt_array($curl, array(
         CURLOPT_URL => 'https://www.zohoapis.in/books/v3/expenses?organization_id='.$request->organizationId,
@@ -106,10 +116,7 @@ class ZohoController extends Controller
         return $response;
     }
 
-
-    // 1000.ae5012166939bf37375ef85078c7685e.3377d3c734c8ae68b39d0f8e7af03e56
-
-    function getAccessToken() {    
+    function getAccessToken($refreshToken) {    
 
         $curl = curl_init();
 
@@ -122,7 +129,7 @@ class ZohoController extends Controller
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => array('client_id' => '1000.NP4OCL5SM2UFNLG5Z4VNIXIU5DWSQU','grant_type' => 'refresh_token','client_secret' => 'b240adb5d810d0f592baf8642cf6aae27f77b274b4','refresh_token' => '1000.e9c1750b86bdfec5c53448e1ef9dbf32.82e6aa5612a818f7311e2722086f1396'),
+        CURLOPT_POSTFIELDS => array('client_id' => '1000.NP4OCL5SM2UFNLG5Z4VNIXIU5DWSQU','grant_type' => 'refresh_token','client_secret' => 'b240adb5d810d0f592baf8642cf6aae27f77b274b4','refresh_token' => $refreshToken),
         CURLOPT_HTTPHEADER => array(
             'Cookie: _zcsr_tmp=30d24c0f-d73f-4b28-a405-7ff144aea20f; iamcsr=30d24c0f-d73f-4b28-a405-7ff144aea20f; zalb_6e73717622=cc36c6f8a6790832246efd66c032e512'
         ),
